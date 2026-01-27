@@ -1,19 +1,30 @@
 {
   "manifest_version": 3,
   "name": "Jira Memory Tracker",
-  "version": "1.0",
-  "description": "Track Jira ticket status, reporter replies, and personal notes across queues.",
-  "permissions": ["storage", "activeTab", "scripting", "downloads"],
-  "host_permissions": ["https://*.atlassian.net/*"],
+  "version": "1.1",
+  "description": "Track Jira tickets across queues with notes and CSV export",
+  "permissions": [
+    "activeTab",
+    "downloads",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://*.atlassian.net/*"
+  ],
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
   },
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
-      "matches": ["https://*.atlassian.net/*"],
+      "matches": ["https://*.atlassian.net/browse/*"],
       "js": ["content.js"]
     }
   ]
