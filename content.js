@@ -1,36 +1,29 @@
-function scrapeTicket() {
-  const ticketKey = document.querySelector(
-    '[data-testid="issue.views.issue-base.foundation.breadcrumbs.breadcrumb-current-issue"]'
-  )?.innerText;
-
-  const status = document.querySelector(
-    '[data-testid="issue.fields.status.common.ui.status-lozenge"]'
-  )?.innerText;
-
-  const assignee = document.querySelector(
-    '[data-testid="issue.fields.assignee.common.ui.user-name"]'
-  )?.innerText || "Unassigned";
-
-  const reporter = document.querySelector(
-    '[data-testid="issue.fields.reporter.common.ui.user-name"]'
-  )?.innerText || "Unknown";
-
-  if (!ticketKey) return;
-
-  chrome.storage.local.get([ticketKey], (existing) => {
-    const previous = existing[ticketKey] || {};
-
-    chrome.storage.local.set({
-      [ticketKey]: {
-        ticketKey,
-        status,
-        assignee,
-        reporter,
-        lastUpdated: new Date().toISOString(),
-        note: previous.note || ""
-      }
-    });
-  });
+function getStorage() {
+  if (chrome && chrome.storage && chrome.storage.local) return "chrome";
+  return "local";
 }
 
-setTimeout(scrapeTicket, 3000);
+function saveTicket(ticketKey, ticketData) {
+  if (getStorage() === "chrome") {
+    chrome.storage.local.set({ [ticketKey]: ticketData });
+  } else {
+    localStorage.setItem(ticketKey, JSON.stringify(ticketData));
+  }
+}
+
+// Extract ticket data from Jira page
+const ticketKey = document.querySelector("#key-val")?.innerText || "UNKNOWN";
+const status = document.querySelector("[data-test-id='issue.views.issue-base.foundation.status.status-field']")?.innerText || "UNKNOWN";
+const assignee = document.querySelector("[data-test-id='issue.views.issue-base.foundation.assignee.assignee-field']")?.innerText || "UNKNOWN";
+const reporter = document.querySelector("[data-test-id='issue.views.issue-base.foundation.reporter.reporter-field']")?.innerText || "UNKNOWN";
+
+const ticketData = {
+  ticketKey,
+  status,
+  assignee,
+  reporter,
+  lastUpdated: new Date().toISOString(),
+  note: ""
+};
+
+saveTicket(ticketKey, ticketData);
