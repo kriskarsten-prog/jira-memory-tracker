@@ -1,53 +1,58 @@
-async function render() {
+document.addEventListener("DOMContentLoaded", () => {
   const container = document.getElementById("tickets");
-  const tickets = await Storage.getAll();
 
-  container.innerHTML = "";
+  function loadTickets() {
+    container.innerHTML = "";
 
-  const values = Object.values(tickets);
+    const keys = Object.keys(localStorage).filter(k => k.startsWith("jira_"));
 
-  if (!values.length) {
-    container.innerText = "Open a Jira ticket to start tracking.";
-    return;
+    if (!keys.length) {
+      container.innerText = "Open a Jira ticket to start tracking.";
+      return;
+    }
+
+    keys.forEach(key => {
+      const ticket = JSON.parse(localStorage.getItem(key));
+      const div = document.createElement("div");
+      div.className = "ticket";
+
+      div.innerHTML = `
+        <strong>${ticket.key}</strong><br>
+        Status: ${ticket.status}<br>
+        Assignee: ${ticket.assignee}<br>
+        <textarea>${ticket.note || ""}</textarea>
+      `;
+
+      const textarea = div.querySelector("textarea");
+      textarea.addEventListener("change", () => {
+        ticket.note = textarea.value;
+        localStorage.setItem(key, JSON.stringify(ticket));
+      });
+
+      container.appendChild(div);
+    });
   }
 
-  values.forEach(ticket => {
-    const div = document.createElement("div");
-    div.className = "ticket";
+  document.getElementById("export").addEventListener("click", () => {
+    const tickets = Object.keys(localStorage)
+      .filter(k => k.startsWith("jira_"))
+      .map(k => JSON.parse(localStorage.getItem(k)));
 
-    div.innerHTML = `
-      <strong>${ticket.key}</strong><br/>
-      Status: ${ticket.status}<br/>
-      Assignee: ${ticket.assignee}<br/>
-      <textarea placeholder="Add context…">${ticket.note || ""}</textarea>
-    `;
+    if (!tickets.length) return;
 
-    const textarea = div.querySelector("textarea");
-    textarea.addEventListener("change", () => {
-      ticket.note = textarea.value;
-      Storage.set(ticket.key, ticket);
-    });
+    const csv = [
+      ["Key", "Status", "Assignee", "Reporter", "Last Viewed", "Note"].join(","),
+      ...tickets.map(t =>
+        [t.key, t.status, t.assignee, t.reporter, t.lastViewed, `"${t.note || ""}"`].join(",")
+      )
+    ].join("\n");
 
-    container.appendChild(div);
+    const blob = new Blob([csv], { type: "text/csv" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "jira_memory_tracker.csv";
+    link.click();
   });
-}
 
-document.getElementById("export").addEventListener("click", async () => {
-  const tickets = Object.values(await Storage.getAll());
-  if (!tickets.length) return;
-
-  const header = ["Key", "Status", "Assignee", "Reporter", "Last Viewed", "Note"];
-  const rows = tickets.map(t =>
-    [t.key, t.status, t.assignee, t.reporter, t.lastViewed, `"${t.note || ""}"`].join(",")
-  );
-
-  const csv = [header.join(","), ...rows].join("\n");
-  const blob = new Blob([csv], { type: "text/csv" });
-
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = `jira_memory_tracker_${new Date().toISOString().slice(0,10)}.csv`;
-  link.click();
+  loadTickets();
 });
-
-render();
