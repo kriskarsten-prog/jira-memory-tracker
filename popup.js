@@ -1,54 +1,53 @@
-document.addEventListener("DOMContentLoaded", async () => {
-  const ticketList = document.getElementById("ticketList");
-  const tickets = await getAllTickets();
+async function render() {
+  const container = document.getElementById("tickets");
+  const tickets = await Storage.getAll();
 
-  ticketList.innerHTML = "";
+  container.innerHTML = "";
 
-  if (Object.keys(tickets).length === 0) {
-    ticketList.innerHTML = "No tickets tracked yet. Open a Jira ticket first.";
+  const values = Object.values(tickets);
+
+  if (!values.length) {
+    container.innerText = "Open a Jira ticket to start tracking.";
+    return;
   }
 
-  Object.values(tickets).forEach((t) => {
+  values.forEach(ticket => {
     const div = document.createElement("div");
     div.className = "ticket";
 
     div.innerHTML = `
-      <strong>${t.ticketKey}</strong> (${t.status})<br>
-      Assignee: ${t.assignee}<br>
-      Reporter: ${t.reporter}<br>
-      Last Updated: ${t.lastUpdated}<br>
-      <textarea placeholder="Add note...">${t.note || ""}</textarea>
+      <strong>${ticket.key}</strong><br/>
+      Status: ${ticket.status}<br/>
+      Assignee: ${ticket.assignee}<br/>
+      <textarea placeholder="Add context…">${ticket.note || ""}</textarea>
     `;
 
     const textarea = div.querySelector("textarea");
     textarea.addEventListener("change", () => {
-      t.note = textarea.value;
-      saveTicketData(t.ticketKey, t);
+      ticket.note = textarea.value;
+      Storage.set(ticket.key, ticket);
     });
 
-    ticketList.appendChild(div);
+    container.appendChild(div);
   });
+}
 
-  document.getElementById("exportBtn").addEventListener("click", async () => {
-    const allTickets = await getAllTickets();
-    const headers = ["Ticket", "Status", "Assignee", "Reporter", "Last Updated", "Note"];
-    const rows = Object.values(allTickets).map(t =>
-      [t.ticketKey, t.status, t.assignee, t.reporter, t.lastUpdated, `"${t.note || ""}"`].join(",")
-    );
-    const csv = [headers.join(","), ...rows].join("\n");
+document.getElementById("export").addEventListener("click", async () => {
+  const tickets = Object.values(await Storage.getAll());
+  if (!tickets.length) return;
 
-    const blob = new Blob([csv], { type: "text/csv" });
+  const header = ["Key", "Status", "Assignee", "Reporter", "Last Viewed", "Note"];
+  const rows = tickets.map(t =>
+    [t.key, t.status, t.assignee, t.reporter, t.lastViewed, `"${t.note || ""}"`].join(",")
+  );
 
-    // Cross-browser download
-    if (chrome && chrome.downloads) {
-      const url = URL.createObjectURL(blob);
-      chrome.downloads.download({ url, filename: `jira_ticket_tracker_${new Date().toISOString().slice(0,10)}.csv` });
-    } else {
-      // Island / fallback
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = `jira_ticket_tracker_${new Date().toISOString().slice(0,10)}.csv`;
-      link.click();
-    }
-  });
+  const csv = [header.join(","), ...rows].join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `jira_memory_tracker_${new Date().toISOString().slice(0,10)}.csv`;
+  link.click();
 });
+
+render();
