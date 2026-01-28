@@ -1,44 +1,12 @@
-# Jira Memory Tracker (Chrome Extension)
+# Jira Memory Tracker
 
-A lightweight Chrome extension for Jira Cloud that helps operators, admins, and support teams
-track ticket progress across queues without constantly reopening individual issues.
-
-## Problem
-Jira queues require opening tickets individually to remember:
-- Current status
-- Whether a reporter has replied
-- What work was last done
-- Where attention is needed next
-
-This creates unnecessary context switching and cognitive load.
-
-## Solution
-Jira Memory Tracker automatically captures key ticket metadata when tickets are viewed and
-provides a centralized dashboard with:
-- Ticket status, assignee, reporter
-- Last viewed timestamp
-- Private workflow notes
-- CSV export for reporting and retrospectives
+A Chrome extension that tracks Jira issue status, effort, and private notes locally in your browser.
 
 ## Features
-- Works with Jira Cloud
-- Tracks tickets opened from queues or direct links
-- Local private notes per ticket
-- One-click CSV export
-- No backend required
-
-## Tech Stack
-- JavaScript
-- Chrome Extensions (Manifest v3)
-- Jira Cloud DOM integration
-- Chrome local storage
-
-## Use Cases
-- Sales Operations
-- Revenue Operations
-- Support Operations
-- Jira Admins
-- Program Managers
+- Extracts Jira issue status and effort
+- Adds private and checklist-linked notes
+- Popup dashboard of recently viewed issues
+- 100% local storage (no Jira API, no network calls)
 
 ## Installation (Developer Mode)
 1. Clone the repo
