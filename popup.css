@@ -1,0 +1,17 @@
+body {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  padding: 8px;
+  width: 280px;
+}
+
+.issue {
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 6px;
+  padding-bottom: 6px;
+}
+
+.note {
+  font-style: italic;
+  color: #555;
+}
