@@ -1,18 +1,19 @@
 {
   "manifest_version": 3,
   "name": "Jira Memory Tracker",
-  "version": "1.3",
-  "description": "Track Jira tickets you open and remember context.",
-  "permissions": ["activeTab"],
-  "host_permissions": ["https://*.atlassian.net/*"],
-  "action": {
-    "default_popup": "popup.html"
-  },
+  "description": "Track Jira status, effort, and private notes locally.",
+  "version": "1.0.0",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "*://*.atlassian.net/*"
+  ],
   "content_scripts": [
     {
-      "matches": ["https://*.atlassian.net/browse/*"],
-      "js": ["content.js"],
-      "run_at": "document_idle"
+      "matches": ["*://*.atlassian.net/browse/*"],
+      "js": ["content.js"]
     }
-  ]
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
 }
