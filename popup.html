@@ -1,21 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Jira Memory Tracker</title>
-  <style>
-    body { font-family: Arial, sans-serif; width: 320px; padding: 10px; }
-    .ticket { border-bottom: 1px solid #ddd; margin-bottom: 10px; padding-bottom: 6px; }
-    textarea { width: 100%; height: 40px; }
-    button { margin-top: 8px; width: 100%; }
-  </style>
+  <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <h3>Tracked Jira Tickets</h3>
-  <div id="tickets">Loading…</div>
-  <button id="export">Export CSV</button>
-
-  <script src="storage.js"></script>
+  <h3>Jira Memory</h3>
+  <div id="issues"></div>
   <script src="popup.js"></script>
 </body>
 </html>
