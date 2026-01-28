@@ -1,58 +1,27 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const container = document.getElementById("tickets");
+const STORAGE_KEY = "jiraIssues";
+const container = document.getElementById("issues");
 
-  function loadTickets() {
-    container.innerHTML = "";
+chrome.storage.local.get({ [STORAGE_KEY]: {} }, (data) => {
+  const issues = Object.values(data[STORAGE_KEY])
+    .sort((a, b) => new Date(b.lastViewed) - new Date(a.lastViewed))
+    .slice(0, 10);
 
-    const keys = Object.keys(localStorage).filter(k => k.startsWith("jira_"));
-
-    if (!keys.length) {
-      container.innerText = "Open a Jira ticket to start tracking.";
-      return;
-    }
-
-    keys.forEach(key => {
-      const ticket = JSON.parse(localStorage.getItem(key));
-      const div = document.createElement("div");
-      div.className = "ticket";
-
-      div.innerHTML = `
-        <strong>${ticket.key}</strong><br>
-        Status: ${ticket.status}<br>
-        Assignee: ${ticket.assignee}<br>
-        <textarea>${ticket.note || ""}</textarea>
-      `;
-
-      const textarea = div.querySelector("textarea");
-      textarea.addEventListener("change", () => {
-        ticket.note = textarea.value;
-        localStorage.setItem(key, JSON.stringify(ticket));
-      });
-
-      container.appendChild(div);
-    });
+  if (!issues.length) {
+    container.textContent = "No issues tracked yet.";
+    return;
   }
 
-  document.getElementById("export").addEventListener("click", () => {
-    const tickets = Object.keys(localStorage)
-      .filter(k => k.startsWith("jira_"))
-      .map(k => JSON.parse(localStorage.getItem(k)));
+  issues.forEach(issue => {
+    const div = document.createElement("div");
+    div.className = "issue";
 
-    if (!tickets.length) return;
+    div.innerHTML = `
+      <strong>${issue.key}</strong>
+      <div>Status: ${issue.status || "—"}</div>
+      <div>Effort: ${issue.effort || "—"}</div>
+      <div class="note">${issue.notes?.private || ""}</div>
+    `;
 
-    const csv = [
-      ["Key", "Status", "Assignee", "Reporter", "Last Viewed", "Note"].join(","),
-      ...tickets.map(t =>
-        [t.key, t.status, t.assignee, t.reporter, t.lastViewed, `"${t.note || ""}"`].join(",")
-      )
-    ].join("\n");
-
-    const blob = new Blob([csv], { type: "text/csv" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "jira_memory_tracker.csv";
-    link.click();
+    container.appendChild(div);
   });
-
-  loadTickets();
 });
