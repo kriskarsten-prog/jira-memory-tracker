@@ -1,44 +1,17 @@
-(function () {
-  console.log("Jira Memory Tracker: content script loaded");
+// Example selectors
+const issueKey = document.querySelector('[data-test-id="issue.views.issue-base.foundation.breadcrumbs.breadcrumb-current-issue.ellipsis"]')?.textContent;
+const summary = document.querySelector('[data-test-id="issue.views.field.value.summary"]')?.textContent;
+const status = document.querySelector('[data-test-id="issue.views.field.value.status"]')?.textContent;
 
-  function waitForJira() {
-    return new Promise(resolve => {
-      const check = setInterval(() => {
-        if (document.body && location.pathname.includes("/browse/")) {
-          clearInterval(check);
-          resolve();
-        }
-      }, 500);
-    });
-  }
-
-  function getText(selector) {
-    const el = document.querySelector(selector);
-    return el ? el.innerText.trim() : "UNKNOWN";
-  }
-
-  async function captureTicket() {
-    await waitForJira();
-
-    const ticketKey = location.pathname.split("/browse/")[1];
-    if (!ticketKey) return;
-
-    const ticket = {
-      key: ticketKey,
-      status: getText('[data-testid*="status"]'),
-      assignee: getText('[data-testid*="assignee"]'),
-      reporter: getText('[data-testid*="reporter"]'),
-      lastViewed: new Date().toISOString(),
-      note: ""
+if (issueKey) {
+  chrome.storage.local.get({ issues: {} }, (data) => {
+    const issues = data.issues;
+    issues[issueKey] = {
+      key: issueKey,
+      summary,
+      status,
+      lastViewed: new Date().toISOString()
     };
-
-    try {
-      localStorage.setItem(`jira_${ticketKey}`, JSON.stringify(ticket));
-      console.log("Jira Memory Tracker saved:", ticket);
-    } catch (e) {
-      console.error("Storage failed", e);
-    }
-  }
-
-  captureTicket();
-})();
+    chrome.storage.local.set({ issues });
+  });
+}
