@@ -1,19 +1,26 @@
 {
   "manifest_version": 3,
   "name": "Jira Memory Tracker",
-  "description": "Track Jira status, effort, and private notes locally.",
   "version": "1.0.0",
-  "permissions": ["storage"],
-  "host_permissions": [
-    "*://*.atlassian.net/*"
-  ],
+  "description": "Track Jira tickets with private notes and status tracking",
+  "permissions": ["storage", "activeTab", "scripting", "tabs"],
+  "host_permissions": ["*://*/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
   "content_scripts": [
     {
-      "matches": ["*://*.atlassian.net/browse/*"],
-      "js": ["content.js"]
+      "matches": ["*://*.atlassian.net/browse/*", "*://*.atlassian.net/jira/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
     }
   ],
-  "action": {
-    "default_popup": "popup.html"
+  "background": {
+    "service_worker": "background.js"
   }
 }
